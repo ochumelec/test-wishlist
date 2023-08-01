@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WishListController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,9 +27,31 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::get('/dashboard/create_wishlist', function () {
+    return Inertia::render('WishList/Create');
+})->middleware(['auth'])->name('create_wish_list');
+
+//Route::get('/wishlist/{url}', function () {
+//    return Inertia::render('WishListView', ['url' => '{url}']);
+//    Route::get('/wishlist/{url}', [WishListController::class, 'view'])->name('wishlist.view');
+//})->name('wishlist.view');
+
+
+Route::get('/wishlist/{url}', [WishListController::class, 'view'])->name('wishlist.view');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/wishlist/edit/{url}', [WishListController::class, 'edit'])->name('wishlist.edit');
+
+    Route::get('/wishlist/wish/reserve/{id}', [WishListController::class, 'reserve'])->name('wishlist.reserve');
+
+    Route::post('/wishlist', [WishListController::class, 'create'])->name('wishlist.create');
+    Route::post('/wishlist/save', [WishListController::class, 'update'])->name('wishlist.update');
+    Route::delete('/wishlist', [WishListController::class, 'destroy'])->name('wishlist.destroy');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
